@@ -104,4 +104,4 @@ npm run build     # typecheck + production-сборка
 ### Релиз
 
 Подними версию в `manifest.json`, `package.json` и `versions.json`, затем
-`git tag 0.1.1 && git push origin 0.1.1` — GitHub Actions соберёт и опубликует релиз.
+`git tag 0.1.1 && git push origin 0.1.1` (или Actions → Release → Run workflow) — GitHub Actions соберёт и опубликует релиз.

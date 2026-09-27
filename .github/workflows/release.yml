@@ -1,9 +1,11 @@
-# Push a tag equal to the manifest version (e.g. `git tag 0.1.0 && git push origin 0.1.0`)
-# to publish a release that BRAT / manual install can use.
+# Publishes a release that BRAT / manual install can use. Either push a tag equal to the
+# manifest version (`git tag 0.1.1 && git push origin 0.1.1`) or run this workflow by hand
+# (Actions → Release → Run workflow): the tag is then created from manifest.json's version.
 name: Release
 on:
   push:
     tags: ["*"]
+  workflow_dispatch:
 permissions:
   contents: write
 jobs:
@@ -21,4 +23,11 @@ jobs:
       - name: Create release
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release create "$GITHUB_REF_NAME" main.js manifest.json styles.css --title "$GITHUB_REF_NAME" --generate-notes
+        run: |
+          if [ "$GITHUB_REF_TYPE" = "tag" ]; then
+            VERSION="$GITHUB_REF_NAME"
+          else
+            VERSION=$(node -p "require('./manifest.json').version")
+          fi
+          gh release create "$VERSION" main.js manifest.json styles.css \
+            --target "$GITHUB_SHA" --title "$VERSION" --generate-notes
