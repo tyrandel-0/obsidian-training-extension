@@ -1,0 +1,9 @@
+{
+  "id": "training-tracker",
+  "name": "Training Tracker",
+  "version": "0.1.0",
+  "minAppVersion": "1.5.0",
+  "description": "Workout tracker inside your vault: routines, set logging, rest timer, exercise library with images, progress reports.",
+  "author": "tyrandel",
+  "isDesktopOnly": false
+}

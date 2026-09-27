@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Training Tracker preview</title>
+    <link rel="stylesheet" href="styles.css" />
+    <style>
+      /* rough stand-ins for Obsidian theme variables */
+      body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", sans-serif; font-size: 16px;
+        --text-normal: #1d1d1f; --text-muted: #6e6e73; --background-primary: #ffffff; --background-secondary: #f6f6f8;
+        --background-primary-alt: #f4f4f6; --background-modifier-border: #e3e3e8; --background-modifier-hover: #ececef; --color-red: #e5484d; }
+      body.theme-dark { --text-normal: #e8e8ea; --text-muted: #9a9aa2; --background-primary: #1e1e1e; --background-secondary: #262626;
+        --background-primary-alt: #2a2a2a; --background-modifier-border: #3a3a3a; --background-modifier-hover: #333; background: #1e1e1e; }
+      #root { position: fixed; inset: 0; }
+      button { font: inherit; border: none; cursor: pointer; color: inherit; background: #eee; border-radius: 8px; padding: 6px 10px; }
+      input, select, textarea { font: inherit; border: 1px solid #ddd; border-radius: 8px; padding: 6px 8px; box-sizing: border-box; color: inherit; background: transparent; }
+      .shim-modal-bg { position: fixed; inset: 0; background: rgba(0,0,0,.4); display: flex; align-items: center; justify-content: center; z-index: 10; }
+      .shim-modal { background: var(--background-primary); color: var(--text-normal); padding: 16px; border-radius: 16px; width: min(92vw, 420px); }
+      .shim-setting { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: flex-end; margin-top: 8px; }
+      .shim-setting > b { flex: 1 1 100%; }
+      .shim-menu { position: fixed; right: 16px; background: var(--background-primary); color: var(--text-normal); box-shadow: 0 6px 24px rgba(0,0,0,.2); border-radius: 12px; z-index: 20; }
+      .shim-menu div { padding: 10px 16px; }
+      .shim-notice { position: fixed; top: 12px; left: 50%; transform: translateX(-50%); background: #222; color: #fff; padding: 10px 16px; border-radius: 10px; z-index: 30; }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script src="preview.js"></script>
+  </body>
+</html>

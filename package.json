@@ -1,0 +1,28 @@
+{
+  "name": "obsidian-training-tracker",
+  "version": "0.1.0",
+  "description": "Workout tracker that lives inside your Obsidian vault",
+  "main": "main.js",
+  "scripts": {
+    "dev": "node esbuild.config.mjs",
+    "build": "tsc --noEmit && node esbuild.config.mjs production",
+    "typecheck": "tsc --noEmit",
+    "test": "node --test --experimental-strip-types test/*.test.ts",
+    "preview": "node dev/build-preview.mjs --serve"
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "@types/js-yaml": "^4.0.9",
+    "@types/node": "^26.6.3",
+    "builtin-modules": "^5.4.0",
+    "esbuild": "^0.28.2",
+    "js-yaml": "^5.4.2",
+    "lucide": "^1.48.0",
+    "obsidian": "^1.13.1",
+    "typescript": "^7.0.2"
+  },
+  "dependencies": {
+    "preact": "^10.29.8"
+  },
+  "type": "module"
+}
