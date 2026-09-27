@@ -93,9 +93,10 @@ export function ExImage({ exercise, animate, class: cls }: { exercise?: Exercise
   const url0 = useImage(refs[0], exercise?.file);
   const url1 = useImage(multi ? refs[1] : undefined, exercise?.file);
   const url = frame === 1 && url1 ? url1 : url0;
+  const [broken, setBroken] = useState<string | undefined>();
   return (
     <div class={`tt-img ${cls ?? ""}`} ref={box}>
-      {url ? <img src={url} alt="" loading="lazy" draggable={false} /> : <Icon name="dumbbell" />}
+      {url && broken !== url ? <img src={url} alt="" loading="lazy" draggable={false} onError={() => setBroken(url)} /> : <Icon name="dumbbell" />}
     </div>
   );
 }

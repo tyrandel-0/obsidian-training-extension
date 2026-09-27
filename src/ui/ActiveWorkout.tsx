@@ -1,6 +1,6 @@
 import { Modal, Notice, Setting } from "obsidian";
 import { useEffect, useRef, useState } from "preact/hooks";
-import { doneSets, fmtClock, fmtDuration, fmtKg, fmtSet, lastPerformance, localIso, workoutDuration, workoutVolume } from "../format";
+import { doneSets, fmtClock, fmtDuration, fmtKg, pluralRu, fmtSet, lastPerformance, localIso, workoutDuration, workoutVolume } from "../format";
 import type { Workout, WorkoutExercise } from "../types";
 import { BigButton, Empty, Icon, Screen, TopBar } from "./components";
 import { useCtx, useNow, useStore } from "./context";
@@ -102,7 +102,7 @@ function finishDialog(app: import("obsidian").App, w: Workout, hasRoutine: boole
       d.createDiv({ cls: "tt-stat-label", text: l });
     };
     stat(fmtDuration(workoutDuration(w)), "время");
-    stat(String(sets), "подходов");
+    stat(String(sets), pluralRu(sets, "подход", "подхода", "подходов"));
     stat(fmtKg(workoutVolume(w)), "кг поднято");
     const undone = w.exercises.reduce((a, e) => a + e.sets.filter((s) => !s.done).length, 0);
     if (undone) m.contentEl.createEl("p", { cls: "tt-muted", text: `Неотмеченные подходы (${undone}) не попадут в историю.` });

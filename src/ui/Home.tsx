@@ -196,7 +196,7 @@ export function WorkoutDetail({ file }: { file: string }) {
       <div class="tt-scroll">
         <div class="tt-stats">
           <Stat label="время" value={fmtDuration(workoutDuration(w))} />
-          <Stat label="подходов" value={String(doneSets(w))} />
+          <Stat label={pluralRu(doneSets(w), "подход", "подхода", "подходов")} value={String(doneSets(w))} />
           <Stat label="кг поднято" value={fmtKg(workoutVolume(w))} />
         </div>
         {w.note && <div class="tt-note">{w.note}</div>}

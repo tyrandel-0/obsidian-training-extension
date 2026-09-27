@@ -48,6 +48,8 @@ export function RoutineEdit({ routine }: { routine: Routine }) {
       setDirty(false);
       nav.pop();
       if (!routine.file) nav.push({ kind: "routine", file: saved.file! });
+      // renamed: the detail screen underneath still points at the old path
+      else if (saved.file !== routine.file) nav.replace({ kind: "routine", file: saved.file! });
     } catch (e) {
       store.notifyError(e, "Не удалось сохранить программу");
     }
