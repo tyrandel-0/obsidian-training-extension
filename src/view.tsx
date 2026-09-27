@@ -3,12 +3,14 @@ import { render } from "preact";
 import type TrainingPlugin from "./main";
 import { App } from "./ui/App";
 import type { Nav, Route } from "./ui/context";
+import { watchBottomInset } from "./ui/insets";
 
 export const VIEW_TYPE = "training-tracker";
 
 export class TrainingView extends ItemView {
   nav: Nav | undefined;
   private pending: Route | undefined;
+  private stopInsets: (() => void) | undefined;
 
   constructor(leaf: WorkspaceLeaf, private plugin: TrainingPlugin) {
     super(leaf);
@@ -36,6 +38,7 @@ export class TrainingView extends ItemView {
   async onOpen(): Promise<void> {
     this.contentEl.empty();
     this.contentEl.addClass("tt-root");
+    this.stopInsets = watchBottomInset(this.contentEl);
     const plugin = this.plugin;
     const ctx = {
       app: this.app,
@@ -57,6 +60,7 @@ export class TrainingView extends ItemView {
   }
 
   async onClose(): Promise<void> {
+    this.stopInsets?.();
     await this.plugin.store.flushActive();
     render(null, this.contentEl);
   }

@@ -1,6 +1,6 @@
 {
   "name": "obsidian-training-tracker",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Workout tracker that lives inside your Obsidian vault",
   "main": "main.js",
   "scripts": {

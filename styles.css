@@ -36,6 +36,13 @@
 .tt-layer {
   position: absolute;
   inset: 0;
+}
+.tt-app {
+  /* room for Obsidian's floating mobile navbar, measured in insets.ts */
+  bottom: var(--tt-inset-bottom, 0px);
+}
+.tt-app,
+.tt-layer {
   display: flex;
   flex-direction: column;
   color: var(--tt-text);
@@ -264,7 +271,7 @@
 }
 
 .tt-bottom-bar {
-  padding: 10px 12px calc(10px + env(safe-area-inset-bottom, 0px));
+  padding: 10px 12px calc(10px + max(0px, env(safe-area-inset-bottom, 0px) - var(--tt-inset-bottom, 0px)));
   background: var(--tt-bg);
   border-top: 1px solid var(--tt-border);
   display: flex;
@@ -331,7 +338,7 @@
   display: flex;
   border-top: 1px solid var(--tt-border);
   background: var(--tt-card);
-  padding-bottom: env(safe-area-inset-bottom, 0px);
+  padding-bottom: max(0px, env(safe-area-inset-bottom, 0px) - var(--tt-inset-bottom, 0px));
 }
 .tt-tab {
   flex: 1;

@@ -6,6 +6,7 @@ import { TrainingStore, yaml } from "../src/store";
 import { DEFAULT_SETTINGS, type Routine, type Workout } from "../src/types";
 import { App } from "../src/ui/App";
 import type { Nav } from "../src/ui/context";
+import { watchBottomInset } from "../src/ui/insets";
 import { makeApp, MemoryVault } from "./obsidian-shim";
 
 const params = new URLSearchParams(location.search);
@@ -87,6 +88,13 @@ window.__store = store;
   if (params.get("nolib") === null) await store.importLibrary();
   const root = document.getElementById("root")!;
   root.classList.add("tt-root");
+  watchBottomInset(root);
+  if (params.get("navbar") !== null) {
+    // imitation of Obsidian's floating iOS navbar, to check the UI stays above it
+    const bar = document.createElement("div");
+    bar.style.cssText = "position:fixed;left:40px;right:40px;bottom:30px;height:60px;border-radius:30px;background:rgba(60,60,60,.85);z-index:5";
+    document.body.appendChild(bar);
+  }
   render(
     <App
       ctx={{ app: app as never, store, settings: () => settings, openFile: (p) => console.log("open", p) }}
