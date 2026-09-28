@@ -1,7 +1,8 @@
-import { MarkdownRenderChild, parseYaml, Plugin, type WorkspaceLeaf } from "obsidian";
+import { MarkdownRenderChild, normalizePath, Notice, parseYaml, Plugin, TFolder, type WorkspaceLeaf } from "obsidian";
 import { fmtDuration, fmtKg, fmtSet, setsSummary, workoutDuration, workoutVolume, ROUTINE_BLOCK, WORKOUT_BLOCK } from "./format";
 import { TrainingSettingTab } from "./settings";
 import { TrainingStore } from "./store";
+import { confirm } from "./ui/dialogs";
 import { DEFAULT_SETTINGS, type Settings, type Workout, type WorkoutExercise } from "./types";
 import type { Route } from "./ui/context";
 import { TrainingView, VIEW_TYPE } from "./view";
@@ -64,11 +65,79 @@ export default class TrainingPlugin extends Plugin {
 
   async loadSettings(): Promise<void> {
     this.settings = { ...DEFAULT_SETTINGS, ...((await this.loadData()) ?? {}) };
+    this.settings.rootFolder = cleanFolder(this.settings.rootFolder);
+  }
+
+  private async ensureFolder(path: string): Promise<void> {
+    let cur = "";
+    for (const part of path.split("/")) {
+      cur = cur ? `${cur}/${part}` : part;
+      if (!this.app.vault.getAbstractFileByPath(cur)) await this.app.vault.createFolder(cur);
+    }
+  }
+
+  /**
+   * Point the tracker at another folder (any depth, e.g. "Data/Training").
+   * If data exists only in the old folder, offer to move it there.
+   */
+  async changeRootFolder(input: string): Promise<void> {
+    const next = cleanFolder(input);
+    const prev = this.settings.rootFolder;
+    if (next === prev) return;
+    await this.store.flushActive();
+    const { vault, fileManager } = this.app;
+    const oldFolder = vault.getAbstractFileByPath(prev);
+    const target = vault.getAbstractFileByPath(next);
+    if (next.startsWith(prev + "/")) {
+      new Notice("Нельзя переносить папку внутрь самой себя");
+      return;
+    }
+    if (oldFolder instanceof TFolder && !target) {
+      const move = await confirm(this.app, "Перенести данные?", `Переместить «${prev}» со всеми тренировками в «${next}»?`, "Перенести");
+      if (move) {
+        try {
+          if (next.includes("/")) await this.ensureFolder(next.slice(0, next.lastIndexOf("/")));
+          await fileManager.renameFile(oldFolder, next);
+          // the hidden .library cache is invisible to the vault API; make sure it moved too
+          const adapter = vault.adapter;
+          if ((await adapter.exists(`${prev}/.library`)) && !(await adapter.exists(`${next}/.library`))) {
+            await adapter.rename(`${prev}/.library`, `${next}/.library`);
+          }
+        } catch (e) {
+          this.store.notifyError(e, "Не удалось перенести папку");
+          return;
+        }
+      }
+    } else if (oldFolder instanceof TFolder && target instanceof TFolder) {
+      new Notice(`Папка «${next}» уже существует — данные из «${prev}» не переносились, перенеси их вручную при необходимости.`, 8000);
+    } else if (target && !(target instanceof TFolder)) {
+      new Notice(`«${next}» — это файл, а не папка`);
+      return;
+    } else if (!oldFolder && (await vault.adapter.exists(`${prev}/.library`))) {
+      // only the downloaded exercise base exists so far — take it along instead of downloading again
+      try {
+        await this.ensureFolder(next);
+        if (!(await vault.adapter.exists(`${next}/.library`))) await vault.adapter.rename(`${prev}/.library`, `${next}/.library`);
+      } catch (e) {
+        console.warn("[training] could not move library cache", e);
+      }
+    }
+    this.settings.rootFolder = next;
+    await this.saveSettings();
+    this.store.images.clear();
+    await this.store.load();
+    new Notice(`Папка с данными: ${next}`);
   }
 
   async saveSettings(): Promise<void> {
     await this.saveData(this.settings);
   }
+}
+
+/** "/Data/Training/" -> "Data/Training"; empty -> default. */
+function cleanFolder(path: string | undefined): string {
+  const p = normalizePath((path ?? "").trim()).replace(/^\/+|\/+$/g, "");
+  return p && p !== "/" ? p : DEFAULT_SETTINGS.rootFolder;
 }
 
 // Reading-view rendering of the data blocks inside workout / routine notes.

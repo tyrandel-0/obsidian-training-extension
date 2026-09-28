@@ -1,5 +1,18 @@
-import { Notice, PluginSettingTab, Setting, type App } from "obsidian";
+import { AbstractInputSuggest, Notice, PluginSettingTab, Setting, TFolder, type App } from "obsidian";
 import type TrainingPlugin from "./main";
+
+class FolderSuggest extends AbstractInputSuggest<TFolder> {
+  protected getSuggestions(query: string): TFolder[] {
+    const q = query.toLowerCase();
+    return this.app.vault
+      .getAllLoadedFiles()
+      .filter((f): f is TFolder => f instanceof TFolder && !f.isRoot() && f.path.toLowerCase().includes(q))
+      .slice(0, 50);
+  }
+  renderSuggestion(folder: TFolder, el: HTMLElement): void {
+    el.setText(folder.path);
+  }
+}
 
 export class TrainingSettingTab extends PluginSettingTab {
   private download: { cancelled: boolean } | undefined;
@@ -13,16 +26,31 @@ export class TrainingSettingTab extends PluginSettingTab {
     const p = this.plugin;
     containerEl.empty();
 
+    let folderDraft = p.settings.rootFolder;
     new Setting(containerEl)
       .setName("Папка с данными")
-      .setDesc("Здесь лежат тренировки (Workouts), программы (Routines), свои упражнения (Exercises) и кэш базы (.library).")
-      .addText((t) =>
-        t.setValue(p.settings.rootFolder).onChange(async (v) => {
-          p.settings.rootFolder = v.trim().replace(/\/+$/, "") || "Training";
-          await p.saveSettings();
-        }),
+      .setDesc(
+        "Путь внутри хранилища, можно вложенный: Training, Data/Training… Здесь лежат тренировки (Workouts), программы (Routines), " +
+          "свои упражнения (Exercises) и кэш базы (.library). При смене папки данные можно перенести.",
       )
-      .addButton((b) => b.setButtonText("Перечитать").onClick(() => void p.store.load()));
+      .addText((t) => {
+        t.setPlaceholder("Training")
+          .setValue(p.settings.rootFolder)
+          .onChange((v) => (folderDraft = v));
+        new FolderSuggest(this.app, t.inputEl).onSelect((f) => {
+          folderDraft = f.path;
+          t.setValue(f.path);
+        });
+      })
+      .addButton((b) =>
+        b
+          .setButtonText("Применить")
+          .setCta()
+          .onClick(async () => {
+            await p.changeRootFolder(folderDraft);
+            this.display();
+          }),
+      );
 
     new Setting(containerEl).setName("Тренировка").setHeading();
     new Setting(containerEl)

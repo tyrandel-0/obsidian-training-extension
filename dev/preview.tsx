@@ -13,8 +13,10 @@ const params = new URLSearchParams(location.search);
 if (params.get("theme") === "dark") document.body.classList.add("theme-dark");
 else document.body.classList.add("theme-light");
 
+const ROOT = params.get("root") ?? "Training";
 const settings = {
   ...DEFAULT_SETTINGS,
+  rootFolder: ROOT,
   libraryUrl: params.get("lib") ?? "exercises.json",
   libraryImageBase: params.get("img") ?? DEFAULT_SETTINGS.libraryImageBase,
 };
@@ -51,7 +53,7 @@ const fb3: Routine = {
     { id: "Dumbbell_Rear_Lunge", name: "Dumbbell Rear Lunge", track: "weight_reps", sets: [{ kg: 16, reps: 12 }, { kg: 16, reps: 12 }, { kg: 16, reps: 12 }] },
   ],
 };
-for (const r of [fb1, fb2, fb3]) vault.text.set(`Training/Routines/${r.name}.md`, serializeRoutine(r, yaml));
+for (const r of [fb1, fb2, fb3]) vault.text.set(`${ROOT}/Routines/${r.name}.md`, serializeRoutine(r, yaml));
 
 // ~8 weeks of history with slowly growing weights
 if (params.get("empty") === null) {
@@ -70,7 +72,7 @@ if (params.get("empty") === null) {
       status: "done",
       exercises: r.exercises.map((e) => ({ ...e, sets: e.sets.map((s) => ({ ...s, kg: s.kg !== undefined ? s.kg - 6 + grow : undefined, done: true })) })),
     };
-    vault.text.set(`Training/Workouts/${w.start.slice(0, 4)}/${w.start.slice(0, 10)} ${r.name}.md`, serializeWorkout(w, yaml));
+    vault.text.set(`${ROOT}/Workouts/${w.start.slice(0, 4)}/${w.start.slice(0, 10)} ${r.name}.md`, serializeWorkout(w, yaml));
   }
 }
 
