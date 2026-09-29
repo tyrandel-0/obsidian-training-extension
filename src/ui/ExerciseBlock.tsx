@@ -2,7 +2,7 @@ import { equipmentLabel, nextSet, pluralRu, TRACK_LABELS } from "../format";
 import type { Exercise, SetEntry, TrackType, WorkoutExercise } from "../types";
 import { ExThumb, Icon, IconButton, NumField, TimeField } from "./components";
 import { useCtx } from "./context";
-import { prompt, showMenu, type MenuEntry } from "./dialogs";
+import { confirm, prompt, showMenu, type MenuEntry } from "./dialogs";
 
 export function exerciseTitle(ex: WorkoutExercise, info?: Exercise): string {
   const name = info?.name ?? ex.name;
@@ -120,10 +120,16 @@ export function ExerciseBlock(p: ExerciseBlockProps) {
     showMenu(e, entries);
   };
 
+  const removeSet = async (i: number) => {
+    // a ticked-off set is real history — ask before throwing it away
+    if (p.ex.sets[i].done && !(await confirm(app, "Удалить подход?", `Подход ${i + 1} уже отмечен выполненным.`, "Удалить", true))) return;
+    p.onChange({ ...p.ex, sets: p.ex.sets.filter((_, j) => j !== i) });
+  };
+
   const setMenu = (e: MouseEvent, i: number) =>
     showMenu(e, [
       { title: "Дублировать подход", icon: "copy", onClick: () => p.onChange({ ...p.ex, sets: [...p.ex.sets.slice(0, i + 1), { ...p.ex.sets[i], done: false }, ...p.ex.sets.slice(i + 1)] }) },
-      { title: "Удалить подход", icon: "trash-2", warning: true, onClick: () => p.onChange({ ...p.ex, sets: p.ex.sets.filter((_, j) => j !== i) }) },
+      { title: "Удалить подход", icon: "trash-2", warning: true, onClick: () => void removeSet(i) },
     ]);
 
   return (
@@ -152,6 +158,9 @@ export function ExerciseBlock(p: ExerciseBlockProps) {
                 {i + 1}
               </button>
               <SetFields set={s} track={p.ex.track} onChange={(ns) => setSet(i, ns)} />
+              <button class="tt-set-del" aria-label={`Удалить подход ${i + 1}`} onClick={() => void removeSet(i)}>
+                <Icon name="x" size={18} />
+              </button>
             </div>
           ))}
           <button class="tt-add-set" onClick={() => p.onChange({ ...p.ex, sets: [...p.ex.sets, nextSet(p.ex)] })}>
